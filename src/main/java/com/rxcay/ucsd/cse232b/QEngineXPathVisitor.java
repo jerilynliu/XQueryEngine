@@ -2,6 +2,7 @@ package com.rxcay.ucsd.cse232b;
 import com.rxcay.ucsd.cse232b.antlr4.*;
 import org.w3c.dom.Node;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -11,9 +12,19 @@ import java.util.List;
  * @description
  */
 public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
+    private List<Node> paramNodes = new LinkedList<>();
+    // Attention: param nodes are set in a value-based way. Any callee can modify or return it exclusively.
+    private void setPNodes(List<Node> origin){
+        paramNodes = new LinkedList<>(origin);
+    }
     @Override
     public List<Node> visitSingleAP(XPathParser.SingleAPContext ctx) {
-        return super.visitSingleAP(ctx);
+        // no setPNodes since doc nodes have not been loaded.
+        List<Node> resDoc = visit(ctx.doc());
+        setPNodes(resDoc);
+        return resDoc;
+        //return visit(ctx.rp());
+
     }
 
     @Override
@@ -23,7 +34,11 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
 
     @Override
     public List<Node> visitDoc(XPathParser.DocContext ctx) {
-        return super.visitDoc(ctx);
+        try {
+            return XMLProcessor.loadXMLFileToNodes(ctx.fileName().getText());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

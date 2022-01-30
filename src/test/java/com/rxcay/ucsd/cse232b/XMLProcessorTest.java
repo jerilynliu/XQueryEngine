@@ -1,8 +1,8 @@
 package com.rxcay.ucsd.cse232b;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
+import org.junit.Assert;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import java.util.List;
@@ -13,21 +13,20 @@ import java.util.List;
  * @date 1/29/22 6:07 PM
  * @description
  */
-public class XMLProcessorTest extends TestCase {
-    public XMLProcessorTest( String testName )
-    {
-        super( testName );
-    }
+public class XMLProcessorTest {
 
-    public static Test suite()
-    {
-        return new TestSuite( XMLProcessorTest.class );
-    }
-
+    @Test
     public void testXMLProcessor()
-    {
-        List<Node> r = XMLProcessor.loadDefaultDataFile();
-        Node.ELEMENT_NODE
-        assertTrue(r.size()!=0);
+    {   try {
+            List<Node> r = XMLProcessor.loadDefaultDataFileFromResource();
+            Assert.assertTrue(r.size() != 0);
+            Node docNode = r.get(0);
+            Assert.assertEquals(docNode.getNodeType(), Node.DOCUMENT_NODE);
+            Document d = (Document) docNode;
+            System.out.println(d.getChildNodes().item(0));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+    }
+
     }
 }

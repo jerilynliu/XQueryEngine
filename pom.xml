@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
-      <version>4.9.3</version>
+      <version>4.7.2</version>
     </dependency>
   </dependencies>
   <build>
@@ -28,10 +28,10 @@
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
-        <version>4.5</version>
+        <version>4.7.2</version>
         <configuration>
           <sourceDirectory>src/main/antlr4</sourceDirectory>
-          <outputDirectory>${project.build.directory}/generated-sources/com/rxcay/ucsd/cse232b/antlr4</outputDirectory>-->
+          <outputDirectory>${project.build.directory}/generated-sources/com/rxcay/ucsd/cse232b/antlr4</outputDirectory>
           <listener>false</listener>
           <visitor>true</visitor>
         </configuration>
