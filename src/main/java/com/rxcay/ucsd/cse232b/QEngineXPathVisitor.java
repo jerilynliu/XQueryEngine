@@ -298,7 +298,25 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
 
     @Override
     public List<Node> visitEqFilter(XPathParser.EqFilterContext ctx) {
-        return super.visitEqFilter(ctx);
+        List<Node> origin = paramNodes;
+        return filterCollectVisitHelper(origin,
+                node -> {
+                    List<Node> oneNodeList = new LinkedList<>();
+                    oneNodeList.add(node);
+                    setPNodes(oneNodeList);
+                    List<Node> res1 = visit(ctx.rp(0));
+                    setPNodes(oneNodeList);
+                    List<Node> res2 = visit(ctx.rp(1));
+                    for (Node x : res1) {
+                        for (Node y: res2) {
+                            if (x.isEqualNode(y)) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+        );
     }
 
     @Override
