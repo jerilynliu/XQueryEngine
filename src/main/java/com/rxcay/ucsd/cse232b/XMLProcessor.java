@@ -63,9 +63,7 @@ public class XMLProcessor {
             throw new Exception("XML data file is not in resources");
         }
     }
-
-    public static void generateResultXMLThenOutput(List<Node> rawResult, OutputStream oStream)
-            throws ParserConfigurationException, TransformerException {
+    public static Document generateResultXML(List<Node> rawResult) throws ParserConfigurationException {
         DocumentBuilder bd = docBldFactory.newDocumentBuilder();
         Document outputDoc = bd.newDocument();
         Element resultEle = outputDoc.createElement("RESULT");
@@ -86,11 +84,14 @@ public class XMLProcessor {
             }
 
         }
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.transform(new DOMSource(outputDoc),new StreamResult(oStream));
+        return outputDoc;
     }
+    public static void writeXMLDoc(Document outputDoc, OutputStream oStream) throws TransformerException {
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.transform(new DOMSource(outputDoc),new StreamResult(oStream));}
 
-
-
-
+    public static void generateResultXMLThenOutput(List<Node> rawResult, OutputStream oStream)
+            throws ParserConfigurationException, TransformerException {
+            writeXMLDoc(generateResultXML(rawResult),oStream);
+    }
 }

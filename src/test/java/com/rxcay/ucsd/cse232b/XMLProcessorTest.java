@@ -50,7 +50,7 @@ public class XMLProcessorTest {
             OutputStream o = new ByteArrayOutputStream();
             XMLProcessor.generateResultXMLThenOutput(defaultXMLDomDoc, o);
             String s = o.toString();
-            Assert.assertTrue(s.contains("result"));
+            Assert.assertTrue(s.contains("RESULT"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

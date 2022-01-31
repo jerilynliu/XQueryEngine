@@ -54,6 +54,21 @@
         <target>1.8</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.rxcay.ucsd.cse232b.Engine</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>jar-with-dependencies</descriptorRefs>
+          <appendAssemblyId>false</appendAssemblyId>
+          <finalName>CSE-232B-M1</finalName>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

@@ -13,8 +13,12 @@ public class Engine
 
     public static void main( String[] args )
     {
-       String xPathFilePath = args[0];
-       xPathEvaluate(xPathFilePath);
+        if(args.length != 1){
+            System.out.printf("wrong args number: expect 1 received %d \n", args.length);
+            System.out.println("usage java -jar ");
+        }
+        String xPathFilePath = args[0];
+        xPathEvaluate(xPathFilePath);
     }
 
     private static void xPathEvaluate(String xPathFilePath) {
@@ -22,22 +26,26 @@ public class Engine
         try(
                 InputStream xPathIStream = new FileInputStream(xPathFilePath);
         ) {
-             rawEvaluateRes = XPathEvaluator.evaluateXPathWithoutException(xPathIStream);
+             rawEvaluateRes = XPathEvaluator.evaluateXPathWithoutExceptionPrintErr(xPathIStream);
         } catch (IOException e) {
             System.err.println("open xPath file failed: " + e.getMessage());
         }
         if( rawEvaluateRes == null ){
-            System.err.println("XPath evaluation actually failed. No result file generated.");
+            System.err.println("XPath evaluation failed. No result file generated.");
             return;
         }
+        System.out.println("XPath evaluation finished, writing result file...");
         try(
                 OutputStream resultXMLOStream = new FileOutputStream("xpath_result.xml")
         ) {
             XMLProcessor.generateResultXMLThenOutput(rawEvaluateRes, resultXMLOStream);
-        }  catch (IOException | ParserConfigurationException | TransformerException e) {
-           System.err.println("after evaluation, write result file failed: " + e.getMessage());
-        } catch (Exception e){
-            System.err.println("runtime exception while writing result:" + e.getMessage());
+        }  catch (IOException e) {
+           System.err.println("open result file failed: " + e.getMessage());
+        } catch (ParserConfigurationException | TransformerException e){
+            System.err.println("generating XML or transforming failed:" + e.getMessage());
+        }
+        catch (Exception e){
+            System.err.println("runtime exception while generating/writing result:" + e.getMessage());
         }
     }
 }

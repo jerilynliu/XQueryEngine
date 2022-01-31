@@ -26,21 +26,21 @@ public class XPathEvaluatorTest {
     @Test
     public void testEvaluateXPathNaive(){
         InputStream s = getByteArrayIStreamWithUTF8(XPATH_EX1);
-        List<Node> res = XPathEvaluator.evaluateXPathWithoutException(s);
+        List<Node> res = XPathEvaluator.evaluateXPathWithoutExceptionPrintErr(s);
         Assert.assertNotNull(res);
     }
 
     @Test
     public void testEvaluateXPathEx2(){
         List<Node> res = XPathEvaluator
-                .evaluateXPathWithoutException(getByteArrayIStreamWithUTF8(XPATH_EX2));
+                .evaluateXPathWithoutExceptionPrintErr(getByteArrayIStreamWithUTF8(XPATH_EX2));
         Assert.assertNotNull(res);
         Assert.assertEquals(0, res.size());
     }
     @Test
     public void testEvaluateXPathInvalid(){
         List<Node> res = XPathEvaluator
-                .evaluateXPathWithoutException(getByteArrayIStreamWithUTF8(XPATH_INVALID));
+                .evaluateXPathWithoutExceptionPrintErr(getByteArrayIStreamWithUTF8(XPATH_INVALID));
         Assert.assertNull(res);
 
     }
@@ -48,7 +48,7 @@ public class XPathEvaluatorTest {
     @Test
     public void testEvaluateXPathInvalidXMLFile() {
         List<Node> res = XPathEvaluator
-                .evaluateXPathWithoutException(getByteArrayIStreamWithUTF8(XPATH_INVALID2));
+                .evaluateXPathWithoutExceptionPrintErr(getByteArrayIStreamWithUTF8(XPATH_INVALID2));
         Assert.assertNull(res);
     }
 }

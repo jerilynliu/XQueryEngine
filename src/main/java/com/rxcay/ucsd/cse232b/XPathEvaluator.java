@@ -17,6 +17,7 @@ import java.util.List;
  * @description
  */
 public class XPathEvaluator {
+    // once succeed, return value is valid.
     public static List<Node> evaluateXPath(InputStream xPathStream) throws Exception{
         CharStream cs = CharStreams.fromStream(xPathStream);
         XPathLexer lexer = new XPathLexer(cs);
@@ -24,10 +25,14 @@ public class XPathEvaluator {
         XPathParser parser = new XPathParser(tks);
         parser.removeErrorListeners();
         QEngineXPathVisitor visitor = new QEngineXPathVisitor();
-        return visitor.visit(parser.ap());
+        List<Node> res = visitor.visit(parser.ap());
+        if(res == null){
+            throw new Exception("visitor failed to get result.");
+        }
+        return res;
     }
-
-    public static List<Node> evaluateXPathWithoutException(InputStream xPathStream) {
+    // return null once failed.
+    public static List<Node> evaluateXPathWithoutExceptionPrintErr(InputStream xPathStream) {
         List<Node> res= null;
         try {
             res = evaluateXPath(xPathStream);
