@@ -8,10 +8,6 @@ import javax.xml.transform.TransformerException;
 import java.io.*;
 import java.util.List;
 
-/**
- * Hello world!
- *
- */
 public class Engine
 {
 
@@ -41,7 +37,7 @@ public class Engine
         }  catch (IOException | ParserConfigurationException | TransformerException e) {
            System.err.println("after evaluation, write result file failed: " + e.getMessage());
         } catch (Exception e){
-            System.err.println("runtime exception writing result:" + e.getMessage());
+            System.err.println("runtime exception while writing result:" + e.getMessage());
         }
     }
 }

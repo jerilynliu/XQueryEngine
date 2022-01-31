@@ -68,7 +68,7 @@ public class XMLProcessor {
             throws ParserConfigurationException, TransformerException {
         DocumentBuilder bd = docBldFactory.newDocumentBuilder();
         Document outputDoc = bd.newDocument();
-        Element resultEle = outputDoc.createElement("result");
+        Element resultEle = outputDoc.createElement("RESULT");
         outputDoc.appendChild(resultEle);
         for(Node old: rawResult){
             try {

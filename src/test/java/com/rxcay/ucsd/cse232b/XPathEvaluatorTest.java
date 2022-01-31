@@ -25,7 +25,7 @@ public class XPathEvaluatorTest {
     }
     @Test
     public void testEvaluateXPathNaive(){
-        InputStream s = getByteArrayIStreamWithUTF8(XPATH_EX2);
+        InputStream s = getByteArrayIStreamWithUTF8(XPATH_EX1);
         List<Node> res = XPathEvaluator.evaluateXPathWithoutException(s);
         Assert.assertNotNull(res);
     }
@@ -35,7 +35,7 @@ public class XPathEvaluatorTest {
         List<Node> res = XPathEvaluator
                 .evaluateXPathWithoutException(getByteArrayIStreamWithUTF8(XPATH_EX2));
         Assert.assertNotNull(res);
-        Assert.assertTrue(res.size() > 0);
+        Assert.assertEquals(0, res.size());
     }
     @Test
     public void testEvaluateXPathInvalid(){

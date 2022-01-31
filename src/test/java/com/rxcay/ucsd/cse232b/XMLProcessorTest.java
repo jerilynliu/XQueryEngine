@@ -37,8 +37,8 @@ public class XMLProcessorTest {
             Assert.assertTrue(r.size() != 0);
             Node docNode = r.get(0);
             Assert.assertEquals(docNode.getNodeType(), Node.DOCUMENT_NODE);
-            Document d = (Document) docNode;
-            System.out.println(d.getChildNodes().item(1).getNodeType());
+//            Document d = (Document) docNode;
+//            System.out.println(d.getChildNodes().item(1).getNodeType());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -50,7 +50,7 @@ public class XMLProcessorTest {
             OutputStream o = new ByteArrayOutputStream();
             XMLProcessor.generateResultXMLThenOutput(defaultXMLDomDoc, o);
             String s = o.toString();
-            Assert.assertTrue(s.contains("notImportableNode"));
+            Assert.assertTrue(s.contains("result"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
