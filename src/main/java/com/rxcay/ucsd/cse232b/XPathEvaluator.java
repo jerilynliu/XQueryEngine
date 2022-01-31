@@ -32,7 +32,7 @@ public class XPathEvaluator {
         try {
             res = evaluateXPath(xPathStream);
         } catch (Exception e){
-            System.err.println("XPath query terminated with error: " + e.getMessage());
+            System.err.println("XPath evaluation terminated with error: " + e.getMessage());
             //e.printStackTrace();
         }
         return res;
