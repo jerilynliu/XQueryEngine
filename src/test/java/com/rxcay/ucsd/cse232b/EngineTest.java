@@ -1,5 +1,6 @@
 package com.rxcay.ucsd.cse232b;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
@@ -51,6 +52,7 @@ public class EngineTest {
         "XPath5.txt"
     );
     @Test
+    @Ignore // no files output now.
     public void testXPathQueryOutputFile(){
         for (String fileName: xPathFiles) {
             String prefix = fileName.substring(0, fileName.lastIndexOf("."));
