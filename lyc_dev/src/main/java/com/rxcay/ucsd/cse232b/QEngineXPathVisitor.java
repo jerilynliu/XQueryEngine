@@ -5,6 +5,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -102,7 +103,7 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
             // iterate the children to find the nodes with the right tag
             for (int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
-                if (child.getNodeType() == Node.ELEMENT_NODE && child.getNodeName().equals(ctx.getText())) {
+                if (child.getNodeType() == Node.ELEMENT_NODE && child.getNodeName().equals(ctx.tagName().getText())) {
                     res.add(child);
                 }
             }
@@ -173,6 +174,10 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
         LinkedList<Node> res = new LinkedList<>();
 
         for (Node node : paramNodes) {
+
+            if(node.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+
             NamedNodeMap attributes = node.getAttributes(); // get all attributes of a node
             for (int i = 0; i < attributes.getLength(); i++) {
                 res.add(attributes.item(i));
@@ -205,8 +210,8 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
         List<Node> res2 = visit(ctx.rp(1));
 
         // remove duplicates
-        HashSet<Node> set = new HashSet<>(res2);
-        return new LinkedList<>(set);
+        LinkedHashSet<Node> lhs = new LinkedHashSet<>(res2);
+        return new LinkedList<>(lhs);
 
     }
 
@@ -221,8 +226,8 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
         List<Node> res2 = visitDoubleSlash(ctx.rp(1));
 
         // remove duplicates
-        HashSet<Node> set = new HashSet<>(res2);
-        return new LinkedList<>(set);
+        LinkedHashSet<Node> lhs = new LinkedHashSet<>(res2);
+        return new LinkedList<>(lhs);
 
     }
 
