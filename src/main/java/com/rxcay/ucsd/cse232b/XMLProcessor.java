@@ -88,6 +88,8 @@ public class XMLProcessor {
     }
     public static void writeXMLDoc(Document outputDoc, OutputStream oStream) throws TransformerException {
         Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         transformer.transform(new DOMSource(outputDoc),new StreamResult(oStream));}
 
     public static void generateResultXMLThenOutput(List<Node> rawResult, OutputStream oStream)

@@ -45,11 +45,17 @@ public class EngineTest {
 //        }
 //    }
     List<String> xPathFiles = Arrays.asList(
-        "XPath1.txt",
-        "XPath2.txt",
-        "XPath3.txt",
-        "XPath4.txt",
-        "XPath5.txt"
+            // manually check
+        "XPath1.txt", //OK
+        "XPath2.txt", //OK
+        "XPath3.txt", //OK
+        "XPath4.txt", //OK
+        "XPath5.txt", //OK
+        "NEW_XPATH1.txt", //OK
+        "NEW_XPATH2.txt",  // seems OK, out of order
+        "NEW_XPATH3.txt", //OK
+        "NEW_XPATH4.txt",
+        "NEW_XPATH5.txt" // seems OK, ood
     );
     @Test
     @Ignore // no files output now.
@@ -68,6 +74,7 @@ public class EngineTest {
         }
     }
     @Test
+    @Ignore
     public void textXPathQueryPrintOutput(){
         for (String fileName: xPathFiles) {
             System.out.println(fileName + " XML result:");
