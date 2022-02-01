@@ -1,0 +1,1 @@
+doc("j_caesar.xml")/PLAY/(ACT,PERSONAE)/PGROUP[not(PERSONA)or(GRPDESCR)]/../.
