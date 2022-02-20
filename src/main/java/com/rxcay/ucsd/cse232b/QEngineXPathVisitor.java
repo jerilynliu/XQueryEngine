@@ -42,7 +42,7 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
         return res;
     }
 
-    // helper function
+    // helper function: set the paramNodes to be the descendents-and-self of the original paramNodes, and then perform whatever visit action intended.
     public List<Node> visitDoubleSlash(XPathParser.RpContext ctx) {
 
         List<Node> currentCtxPNodes = paramNodes;
@@ -63,7 +63,7 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
 
         List<Node> currentCtxPNodes2 = paramNodes;
         setPNodes(currentCtxPNodes2);
-        return visit(ctx);
+        return visit(ctx);  // now the paramNodes (the to-be operational context nodes) are successfully updated, perform whatever visit action intended.
     }
 
     @Override
