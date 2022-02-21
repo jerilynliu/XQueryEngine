@@ -31,6 +31,33 @@ public class XPathEvaluator {
         }
         return res;
     }
+    //TODO: use this to parse AP in xquery. Get string of rp text and transform it to InputStream.
+    public static List<Node> evaluateXPathAPWithRtException(InputStream inputStream) {
+        List<Node> res = null; // actually the same as evaluating xpath itself
+        try {
+            res = evaluateXPath(inputStream);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return res;
+    }
+    // TODO: use this to pare RP in xquery. If the connector is '//', use
+    public static List<Node> evaluateXPathRPByPNodesWithRtException(InputStream inputStream, List<Node> pNodes) {
+        try {
+            CharStream cs = CharStreams.fromStream(inputStream);
+            XPathLexer lexer = new XPathLexer(cs);
+            CommonTokenStream tks = new CommonTokenStream(lexer);
+            XPathParser parser = new XPathParser(tks);
+            parser.removeErrorListeners();
+            QEngineXPathVisitor visitor = new QEngineXPathVisitor();
+            visitor.setPNodes(pNodes);
+            return visitor.visit(parser.rp());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     // return null once failed.
     public static List<Node> evaluateXPathWithoutExceptionPrintErr(InputStream xPathStream) {
         List<Node> res= null;

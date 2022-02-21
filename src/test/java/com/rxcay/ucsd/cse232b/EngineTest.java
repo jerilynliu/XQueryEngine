@@ -67,7 +67,7 @@ public class EngineTest {
                     OutputStream testXPathResultOStream = new FileOutputStream(prefix + "_result.xml")
             ) {
                 List<Node> rawResult = XPathEvaluator.evaluateXPath(testXPathIStream);
-                XMLProcessor.generateResultXMLThenOutput(rawResult, testXPathResultOStream);
+                XMLProcessor.generateResultXMLThenOutput(rawResult, testXPathResultOStream, true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -83,7 +83,7 @@ public class EngineTest {
                     OutputStream testXPathResultOStream = new ByteArrayOutputStream()
             ) {
                 List<Node> rawResult = XPathEvaluator.evaluateXPath(testXPathIStream);
-                XMLProcessor.generateResultXMLThenOutput(rawResult, testXPathResultOStream);
+                XMLProcessor.generateResultXMLThenOutput(rawResult, testXPathResultOStream, true);
                 assert testXPathIStream != null;
                 System.out.println(testXPathResultOStream);
             } catch (Exception e) {

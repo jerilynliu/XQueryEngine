@@ -63,7 +63,18 @@ public class XMLProcessor {
             throw new Exception("XML data file is not in resources");
         }
     }
-    public static Document generateResultXML(List<Node> rawResult) throws ParserConfigurationException {
+    public static Document generateResultXMLRaw(List<Node> rawResult) throws ParserConfigurationException {
+        DocumentBuilder bd = docBldFactory.newDocumentBuilder();
+        Document outputDoc = bd.newDocument();
+        if (rawResult.size() != 1) {
+            throw new RuntimeException("size of raw result of xquery eva is not 1, cannot create doc directly");
+        }
+        Node onlyNode = rawResult.get(0);
+        Node newNode = outputDoc.importNode(onlyNode, true);
+        outputDoc.appendChild(newNode);
+        return outputDoc;
+    }
+    public static Document generateResultXMLAddingResultEle(List<Node> rawResult) throws ParserConfigurationException {
         DocumentBuilder bd = docBldFactory.newDocumentBuilder();
         Document outputDoc = bd.newDocument();
         Element resultEle = outputDoc.createElement("RESULT");
@@ -92,8 +103,9 @@ public class XMLProcessor {
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         transformer.transform(new DOMSource(outputDoc),new StreamResult(oStream));}
 
-    public static void generateResultXMLThenOutput(List<Node> rawResult, OutputStream oStream)
+    public static void generateResultXMLThenOutput(List<Node> rawResult, OutputStream oStream, boolean addResEle)
             throws ParserConfigurationException, TransformerException {
-            writeXMLDoc(generateResultXML(rawResult),oStream);
+        Document doc = addResEle ? generateResultXMLAddingResultEle(rawResult) : generateResultXMLRaw(rawResult);
+            writeXMLDoc(doc,oStream);
     }
 }

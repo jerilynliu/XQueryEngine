@@ -24,7 +24,7 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
     private List<Node> paramNodes = new LinkedList<>();
 
     // Attention: param nodes are set in a value-based way. Any callee can modify or return it exclusively.
-    private void setPNodes(List<Node> origin){
+    void setPNodes(List<Node> origin){
         paramNodes = new LinkedList<>(origin);
     }
 
