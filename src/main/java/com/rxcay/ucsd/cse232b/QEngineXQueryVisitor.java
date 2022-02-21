@@ -5,9 +5,7 @@ import com.rxcay.ucsd.cse232b.antlr4.XQueryParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author rx_w@outlook.com
@@ -25,6 +23,8 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     //TODO:need another getDescendents method here to parse #doubleSlashXQ. Get proper pNodes then call XPathEvaluator.
 
 
+    private List<String> varsInForClause = new ArrayList<>();
+
     private Node makeElem(String tag, List<Node> children) {
         Node r = tmpDoc.createElement(tag);
         for (Node n : children) {
@@ -41,7 +41,51 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitFLWR(XQueryParser.FLWRContext ctx) {
-        return super.visitFLWR(ctx);
+        List<String> oldVarsInForClause = this.varsInForClause;
+        Map<String,List<Node>> currentContext;
+        visit(ctx.forClause()); //after this, varsInForClause is set. return is null
+        currentContext = this.contextMap;
+        List<String> varsInCurrentFLWR = this.varsInForClause;
+        int varCnt = varsInCurrentFLWR.size();
+        visit(ctx.letClause());
+        currentContext = this.contextMap;
+        // start permutation for all var
+        int per = 1;
+        List<List<Node>> varNodes = new ArrayList<>();
+        for (int i = 0; i < varCnt; i++) {
+            String name = varsInCurrentFLWR.get(i);
+            List<Node> nodes = currentContext.get(name);
+            varNodes.add(nodes);
+            per *= nodes.size();
+        }
+        List<Node> res = new LinkedList<>();
+        // once any for var is empty, then the result will be empty.
+        if(per > 0) {
+            for (int i = 0; i < per; i++) {
+                int[] indices = new int[varCnt];
+                int fac = 1;
+                for (int j = varCnt - 1;j >= 0;j --) {
+                    indices[j] = i / fac % varNodes.get(j).size();
+                    fac *= varNodes.get(j).size();
+                }
+                Map<String,List<Node>> permMap = new HashMap<>(currentContext);
+                for (int p = 0;p < varCnt;p++){
+                    List<Node> oneNodeList = new LinkedList<>();
+                    oneNodeList.add(varNodes.get(p).get(indices[p]));
+                    permMap.put(varsInCurrentFLWR.get(p), oneNodeList);
+                }
+                this.setContextMap(permMap);
+                List<Node> nullIfFalseList = visit(ctx.whereClause());
+                if (nullIfFalseList != null) {
+                    // where return true
+                    this.setContextMap(permMap);
+                    List<Node> onePermRes = visit(ctx.returnClause());
+                    res.addAll(onePermRes);
+                }
+            }
+        }
+        this.varsInForClause = oldVarsInForClause;
+        return res;
     }
 
     @Override
@@ -61,7 +105,8 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitLetXQ(XQueryParser.LetXQContext ctx) {
-        return super.visitLetXQ(ctx);
+        Map<String, List<Node>> currentContext = this.contextMap;
+
     }
 
     @Override
@@ -91,22 +136,53 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitForClause(XQueryParser.ForClauseContext ctx) {
-        return super.visitForClause(ctx);
+        // for should update context in step and return the updated context and set varsInForClause
+        Map<String, List<Node>> currentContext = this.contextMap;
+        List<XQueryParser.VarContext> vars = ctx.var();
+        int varCnt = vars.size();
+        List<String> varsInFor = new ArrayList<>(varCnt);
+        for (XQueryParser.VarContext varCtx : vars) {
+            varsInFor.add(varCtx.ID().getText());
+        }
+        // set for FLWR
+        this.varsInForClause = varsInFor;
+        List<XQueryParser.XqContext> xqInForClause = ctx.xq();
+        for (int i = 0; i < varCnt; i++) {
+            setContextMap(currentContext);
+            String varName = vars.get(i).getText();
+            List<Node> xqResult = visit(xqInForClause.get(i));
+            currentContext.put(varName, xqResult);
+        }
+        setContextMap(currentContext);
+        return null;
     }
 
     @Override
     public List<Node> visitLetClause(XQueryParser.LetClauseContext ctx) {
-        return super.visitLetClause(ctx);
+        Map<String, List<Node>> currentContext = this.contextMap;
+        List<XQueryParser.VarContext> vars = ctx.var();
+        int varCnt = vars.size();
+        List<XQueryParser.XqContext> xqs = ctx.xq();
+        for (int i = 0; i < varCnt; i++) {
+            String varName = vars.get(i).getText();
+            setContextMap(currentContext);
+            List<Node> xqResult = visit(xqs.get(i));
+            currentContext.put(varName, xqResult);
+        }
+        setContextMap(currentContext);
+        return null;
     }
 
     @Override
     public List<Node> visitWhereClause(XQueryParser.WhereClauseContext ctx) {
-        return super.visitWhereClause(ctx);
+        // with given context, return the boolean result of cond
+        return visit(ctx.cond());
     }
 
     @Override
     public List<Node> visitReturnClause(XQueryParser.ReturnClauseContext ctx) {
-        return super.visitReturnClause(ctx);
+        // with given context, evaluate xq. should use the same context with where clause.
+        return visit(ctx.xq());
     }
 
     @Override
