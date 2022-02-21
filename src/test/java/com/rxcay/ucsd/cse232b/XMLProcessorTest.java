@@ -48,7 +48,7 @@ public class XMLProcessorTest {
     public void testGenerateResult(){
            try {
             OutputStream o = new ByteArrayOutputStream();
-            XMLProcessor.generateResultXMLThenOutput(defaultXMLDomDoc, o);
+            XMLProcessor.generateResultXMLThenOutput(defaultXMLDomDoc, o,true);
             String s = o.toString();
             Assert.assertTrue(s.contains("RESULT"));
         } catch (Exception e) {

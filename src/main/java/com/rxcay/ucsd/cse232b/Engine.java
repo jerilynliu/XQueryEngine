@@ -17,14 +17,13 @@ public class Engine
             System.out.printf("wrong args number: expect 1 received %d \n", args.length);
             System.out.println("usage java -jar ");
         }
-        String xPathFilePath = args[0];
-        xPathEvaluate(xPathFilePath);
+        xQueryEvaluate(args[0]);
     }
 
     private static void xPathEvaluate(String xPathFilePath) {
         List<Node> rawEvaluateRes = null;
         try(
-                InputStream xPathIStream = new FileInputStream(xPathFilePath);
+                InputStream xPathIStream = new FileInputStream(xPathFilePath)
         ) {
              rawEvaluateRes = XPathEvaluator.evaluateXPathWithoutExceptionPrintErr(xPathIStream);
         } catch (IOException e) {
@@ -35,12 +34,32 @@ public class Engine
             return;
         }
         System.out.println("XPath evaluation finished, writing result file...");
+        writeResultToFile(rawEvaluateRes, "xpath_result.xml", true);
+    }
+
+    private static void xQueryEvaluate(String xQueryFilePath) {
+        List<Node> rawEvaluateRes = null;
+        try (InputStream xQueryIStream = new FileInputStream(xQueryFilePath)){
+            rawEvaluateRes = XQueryEvaluator.evaluateXQueryWithoutExceptionPrintErr(xQueryIStream);
+
+        }catch (IOException e) {
+            System.err.println("open xQuery file failed: " + e.getMessage());
+        }
+        if (rawEvaluateRes == null) {
+            System.err.println("XQuery evaluation failed. No result file generated.");
+            return;
+        }
+        System.out.println("XQuery evaluation finished, writing result file...");
+        writeResultToFile(rawEvaluateRes, "xquery_result.xml", false);
+    }
+
+    private static void writeResultToFile(List<Node> rawRes, String fileName, boolean addResEle) {
         try(
-                OutputStream resultXMLOStream = new FileOutputStream("xpath_result.xml")
+                OutputStream resultXMLOStream = new FileOutputStream(fileName)
         ) {
-            XMLProcessor.generateResultXMLThenOutput(rawEvaluateRes, resultXMLOStream);
+            XMLProcessor.generateResultXMLThenOutput(rawRes, resultXMLOStream, addResEle);
         }  catch (IOException e) {
-           System.err.println("open result file failed: " + e.getMessage());
+            System.err.println("open result file failed: " + e.getMessage());
         } catch (ParserConfigurationException | TransformerException e){
             System.err.println("generating XML or transforming failed:" + e.getMessage());
         }
@@ -48,4 +67,5 @@ public class Engine
             System.err.println("runtime exception while generating/writing result:" + e.getMessage());
         }
     }
+
 }
