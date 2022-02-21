@@ -4,10 +4,16 @@ import com.rxcay.ucsd.cse232b.antlr4.XQueryBaseVisitor;
 import com.rxcay.ucsd.cse232b.antlr4.XQueryParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static com.rxcay.ucsd.cse232b.XPathEvaluator.evaluateXPathRPByPNodesWithRtException;
 
 /**
  * @author rx_w@outlook.com
@@ -17,12 +23,49 @@ import java.util.Map;
  */
 public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     private final Document tmpDoc;
-    private Map<String,List<Node>> contextMap = new HashMap<>();
+    private Map<String, List<Node>> contextMap = new HashMap<>();
 
     void setContextMap(Map<String,List<Node>> c) {
         this.contextMap = new HashMap<>(c);
     }
-    //TODO:need another getDescendents method here to parse #doubleSlashXQ. Get proper pNodes then call XPathEvaluator.
+
+    // TODO:need another getDescendents method here to parse #doubleSlashXQ. Get proper pNodes then call XPathEvaluator.
+
+    // helper function to get all strict descendents of a node
+    public LinkedList<Node> getStrictDescendents(Node node) {
+
+        LinkedList<Node> res = new LinkedList<>(); // result
+
+        NodeList childrenNodes = node.getChildNodes();
+        for (int i = 0; i < childrenNodes.getLength(); i++) {
+            Node curtChild = childrenNodes.item(i);
+            res.add(curtChild); // add a child
+            res.addAll(getStrictDescendents(curtChild));
+        }
+        return res;
+    }
+
+    // helper function to obtain the self-and-descendents set of all the input nodes
+    public LinkedList<Node> getSelfAndDescendents(List<Node> nodes){
+
+        LinkedList<Node> res = new LinkedList<>(nodes);
+
+        // store all the strict descendents of nodes into tmp
+        LinkedList<Node> tmp = new LinkedList<>();
+        for (Node node : nodes) {
+            tmp.addAll(getStrictDescendents(node));
+        }
+
+        // add all descendents of nodes to res while removing duplicates
+        for (Node node : tmp) {
+            if (!res.contains(node)) {
+                res.add(node);
+            }
+        }
+
+        return res;
+    }
+
 
 
     private Node makeElem(String tag, List<Node> children) {
@@ -35,6 +78,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         }
         return r;
     }
+
     public QEngineXQueryVisitor(Document tmpDoc) {
         this.tmpDoc = tmpDoc;
     }
@@ -46,17 +90,32 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitSingleSlashXQ(XQueryParser.SingleSlashXQContext ctx) {
-        return super.visitSingleSlashXQ(ctx);
+
+        String rpText = ctx.rp().getText();
+        InputStream i = new ByteArrayInputStream(rpText.getBytes());
+
+        return evaluateXPathRPByPNodesWithRtException(i, visit(ctx.xq()));
+
     }
 
     @Override
     public List<Node> visitTagXQ(XQueryParser.TagXQContext ctx) {
-        return super.visitTagXQ(ctx);
+        String tag = ctx.startTag().tagName().getText();
+        LinkedList<Node> res = new LinkedList<>();
+
+        setContextMap(contextMap);
+        List<Node> nodeList = visit(ctx.xq());
+
+        Node node = makeElem(tag, nodeList);
+        res.add(node);
+
+        return res;
     }
 
     @Override
     public List<Node> visitApXQ(XQueryParser.ApXQContext ctx) {
-        return super.visitApXQ(ctx);
+        setContextMap(contextMap);
+        return visit(ctx.ap());
     }
 
     @Override
@@ -66,27 +125,48 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitCommaXQ(XQueryParser.CommaXQContext ctx) {
-        return super.visitCommaXQ(ctx);
+        Map<String, List<Node>> currentCtxMap = contextMap;
+        setContextMap(currentCtxMap);
+        List<Node> res1 = visit(ctx.xq(0));
+        setContextMap(currentCtxMap);
+        List<Node> res2 = visit(ctx.xq(1));
+
+        res1.addAll(res2);
+        return res1;
     }
 
     @Override
     public List<Node> visitVarXQ(XQueryParser.VarXQContext ctx) {
-        return super.visitVarXQ(ctx);
+        setContextMap(contextMap);
+        return this.contextMap.get(ctx.var().getText());
     }
 
     @Override
     public List<Node> visitScXQ(XQueryParser.ScXQContext ctx) {
-        return super.visitScXQ(ctx);
+        String str = ctx.StringConstant ().getText();
+        str = str.substring(1, str.length() - 1); // remove the left parenthesis and the right parenthesis
+
+        LinkedList<Node> res = new LinkedList<Node>();
+        res.add(this.tmpDoc.createTextNode(str));   // performs makeText()
+
+        return res;
     }
 
     @Override
     public List<Node> visitBraceXQ(XQueryParser.BraceXQContext ctx) {
-        return super.visitBraceXQ(ctx);
+        setContextMap(contextMap);
+        return visit(ctx.xq());
     }
 
     @Override
     public List<Node> visitDoubleSlashXQ(XQueryParser.DoubleSlashXQContext ctx) {
-        return super.visitDoubleSlashXQ(ctx);
+
+        String rpText = ctx.rp().getText();
+        InputStream i = new ByteArrayInputStream(rpText.getBytes());
+
+        List<Node> xqRes = getSelfAndDescendents(visit(ctx.xq()));  // get the proper context nodes for rp parsing
+        return evaluateXPathRPByPNodesWithRtException(i, xqRes);
+
     }
 
     @Override
@@ -126,7 +206,19 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitEmptyCond(XQueryParser.EmptyCondContext ctx) {
-        return super.visitEmptyCond(ctx);
+
+        List<Node> res;
+
+        // create a non-empty list for positive return
+        Node oneNode = tmpDoc.createTextNode("random");
+        LinkedList<Node> oneNodeList = new LinkedList<>();
+        oneNodeList.add(oneNode);
+
+        setContextMap(contextMap);
+        res = visit(ctx.xq());
+
+        if (res.size() != 0) return oneNodeList;  // true
+        return null;   // false
     }
 
     @Override
@@ -136,12 +228,45 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitIsCond(XQueryParser.IsCondContext ctx) {
-        return super.visitIsCond(ctx);
+
+        LinkedList<Node> res = new LinkedList<>();
+        Map<String, List<Node>> currentCtxMap = contextMap;
+
+        setContextMap(currentCtxMap);
+        List<Node> l = visit(ctx.xq(0));
+        setContextMap(currentCtxMap);
+        List<Node> r = visit(ctx.xq(1));
+
+        for (Node ln: l) {
+            for (Node rn: r) {
+                if (ln.isSameNode(rn)) {
+                    res.add(ln); // only storing one node is enough
+                    return res;  // true
+                }
+            }
+        }
+        return null; // false
     }
 
     @Override
     public List<Node> visitEqCond(XQueryParser.EqCondContext ctx) {
-        return super.visitEqCond(ctx);
+        LinkedList<Node> res = new LinkedList<>();
+        Map<String, List<Node>> currentCtxMap = contextMap;
+
+        setContextMap(currentCtxMap);
+        List<Node> l = visit(ctx.xq(0));
+        setContextMap(currentCtxMap);
+        List<Node> r = visit(ctx.xq(1));
+
+        for (Node ln: l) {
+            for (Node rn: r) {
+                if (ln.isEqualNode(rn)) {
+                    res.add(ln); // only storing one node is enough
+                    return res;  // true
+                }
+            }
+        }
+        return null; // false
     }
 
     @Override
@@ -163,6 +288,12 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     public List<Node> visitVar(XQueryParser.VarContext ctx) {
         return super.visitVar(ctx);
     }
+
+
+
+
+
+
 
 
     // TODO: Read this! Attention: methods below should never be called! Do NOT change.
