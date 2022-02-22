@@ -99,6 +99,10 @@ public class EngineTest {
             "Extra_XQuery2.txt",
             "Extra_XQuery3.txt",
             "Extra_XQuery4.txt"
+            //"XQuery_some.txt"
+    );
+    List<String> problemXQueryFiles = Arrays.asList(
+            "XQuery_some.txt" // very slow
     );
 
     @Test

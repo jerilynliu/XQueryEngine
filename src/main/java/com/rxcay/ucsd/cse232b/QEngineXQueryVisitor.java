@@ -21,10 +21,11 @@ import static com.rxcay.ucsd.cse232b.XPathEvaluator.evaluateXPathRPByPNodesWithR
 public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     private final Document tmpDoc;
     private Map<String, List<Node>> contextMap = new HashMap<>();
-
+    private List<Map<String, List<Node>>> forClausePerStates = new ArrayList<>();
     void setContextMap(Map<String,List<Node>> c) {
         this.contextMap = new HashMap<>(c);
     }
+    private final List<Node> DEFAULT_COND_TRUE_LIST = new ArrayList<>(0);
 
     // TODO:need another getDescendents method here to parse #doubleSlashXQ. Get proper pNodes then call XPathEvaluator.
 
@@ -65,7 +66,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
 
 
-    private List<String> varsInForClause = new ArrayList<>();
+
 
     private Node makeElem(String tag, List<Node> children) {
         Node r = tmpDoc.createElement(tag);
@@ -84,55 +85,34 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitFLWR(XQueryParser.FLWRContext ctx) {
-        List<String> oldVarsInForClause = this.varsInForClause;
-        Map<String,List<Node>> currentContext;
+        List<Map<String, List<Node>>> oldStatesInForClause = this.forClausePerStates;
         visit(ctx.forClause()); //after this, varsInForClause is set. return is null
-        List<String> varsInCurrentFLWR = this.varsInForClause;
-        int varCnt = varsInCurrentFLWR.size();
-        currentContext = this.contextMap;
+        List<Map<String, List<Node>>> currentCheckStates = this.forClausePerStates;
+        // do not use current context, it is meaningless
+        // update every per state with let
         XQueryParser.LetClauseContext letClauseCtx = ctx.letClause();
         if (letClauseCtx != null) {
-            visit(ctx.letClause());
-            currentContext = this.contextMap;
-        }
-        // start permutation for all var
-        int per = 1;
-        List<List<Node>> varNodes = new ArrayList<>();
-        for (int i = 0; i < varCnt; i++) {
-            String name = varsInCurrentFLWR.get(i);
-            List<Node> nodes = currentContext.get(name);
-            varNodes.add(nodes);
-            per *= nodes.size();
-        }
-        List<Node> res = new LinkedList<>();
-        // once any for var is empty, then the result will be empty.
-        if(per > 0) {
-            for (int i = 0; i < per; i++) {
-                int[] indices = new int[varCnt];
-                int fac = 1;
-                for (int j = varCnt - 1;j >= 0;j --) {
-                    indices[j] = i / fac % varNodes.get(j).size();
-                    fac *= varNodes.get(j).size();
-                }
-                Map<String,List<Node>> permMap = new HashMap<>(currentContext);
-                for (int p = 0;p < varCnt;p++){
-                    List<Node> oneNodeList = new LinkedList<>();
-                    oneNodeList.add(varNodes.get(p).get(indices[p]));
-                    permMap.put(varsInCurrentFLWR.get(p), oneNodeList);
-                }
-                this.setContextMap(permMap);
-                // if no where clause, then where clause returns always true.
-                XQueryParser.WhereClauseContext whereCtx = ctx.whereClause();
-                List<Node> nullIfFalseList = whereCtx != null ? visit(ctx.whereClause()) : new LinkedList<>();
-                if (nullIfFalseList != null) {
-                    // where return true
-                    this.setContextMap(permMap);
-                    List<Node> onePermRes = visit(ctx.returnClause());
-                    res.addAll(onePermRes);
-                }
+            for (int i = 0; i < currentCheckStates.size(); i++) {
+                Map<String, List<Node>> toUpdateContext = currentCheckStates.get(i);
+                setContextMap(toUpdateContext);
+                visit(ctx.letClause());
+                currentCheckStates.set(i,this.contextMap);
             }
         }
-        this.varsInForClause = oldVarsInForClause;
+        List<Node> res = new LinkedList<>();
+        for(Map<String, List<Node>> state : currentCheckStates) {
+            this.setContextMap(state);
+            // if no where clause, then where clause returns always true.
+            XQueryParser.WhereClauseContext whereCtx = ctx.whereClause();
+            List<Node> nullIfFalseList = whereCtx != null ? visit(ctx.whereClause()) : new LinkedList<>();
+            if (nullIfFalseList != null) {
+                // where return true
+                this.setContextMap(state);
+                List<Node> onePermRes = visit(ctx.returnClause());
+                res.addAll(onePermRes);
+            }
+        }
+        this.forClausePerStates = oldStatesInForClause;
         return res;
     }
 
@@ -227,27 +207,40 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     }
 
+    public void dfsForVarState(XQueryParser.ForClauseContext ctx,
+                               int curIndex,
+                               Map<String, List<Node>> curMap,
+                               List<Map<String,List<Node>>> perStates) {
+        List<Node> res;
+
+        if(ctx.var().size() == curIndex) {
+            perStates.add(curMap);
+            return;
+        }
+        String var = ctx.var(curIndex).ID().getText();
+        XQueryParser.XqContext xq = ctx.xq(curIndex);
+        setContextMap(curMap);
+        res = visit(xq);
+        for (Node node : res) {
+            Map<String, List<Node>> nextMap = new HashMap<>(curMap);
+            LinkedList<Node> curNodeList = new LinkedList<>();
+            curNodeList.add(node);
+            nextMap.put(var, curNodeList);   // results in a deeper context map extended on the basis of the current context map
+
+            dfsForVarState(ctx, curIndex + 1, nextMap, perStates);
+        }
+
+    }
+
     @Override
     public List<Node> visitForClause(XQueryParser.ForClauseContext ctx) {
-        // for should update context in step and return the updated context and set varsInForClause
-        Map<String, List<Node>> currentContext = this.contextMap;
-        List<XQueryParser.VarContext> vars = ctx.var();
-        int varCnt = vars.size();
-        List<String> varsInFor = new ArrayList<>(varCnt);
-        for (XQueryParser.VarContext varCtx : vars) {
-            varsInFor.add(varCtx.ID().getText());
-        }
+        // for should generate all permutation state maps and then set perStates in this class for FLWR
+        Map<String,List<Node>> currentContext = this.contextMap;
+        List<Map<String, List<Node>>> targetPerStates = new ArrayList<>();
         // set for FLWR
-        this.varsInForClause = varsInFor;
-        List<XQueryParser.XqContext> xqInForClause = ctx.xq();
-        for (int i = 0; i < varCnt; i++) {
-            setContextMap(currentContext);
-            String varName = varsInFor.get(i);
-            List<Node> xqResult = visit(xqInForClause.get(i));
-            currentContext.put(varName, xqResult);
-        }
-        setContextMap(currentContext);
-        return null;
+       dfsForVarState(ctx, 0,currentContext,targetPerStates);
+       this.forClausePerStates = targetPerStates;
+       return null;
     }
 
     @Override
@@ -290,10 +283,9 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         boolean bL = visit(ctx.cond(0)) != null;
         setContextMap(currentContext);
         boolean bR = visit(ctx.cond(1)) != null;
-        return bL || bR ? new LinkedList<>() : null;
+        return bL || bR ? DEFAULT_COND_TRUE_LIST : null;
     }
 
-    
     // unfinished, may have npe bugs
     public List<Node> visitSomeVarXq(XQueryParser.SatisfyCondContext ctx, int curIndex, Map<String, List<Node>> curMap) {
         List<Node> res;
@@ -304,7 +296,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
             return visit(ctx.cond());   // apply condition at the deepest context map
         }
 
-        String var = ctx.var(curIndex).getText() ;
+        String var = ctx.var(curIndex).ID().getText() ;
         XQueryParser.XqContext xq = ctx.xq(curIndex);
 
         setContextMap(curMap);
@@ -385,17 +377,11 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     public List<Node> visitEmptyCond(XQueryParser.EmptyCondContext ctx) {
 
         List<Node> res;
-
-        // create a non-empty list for positive return
-        Node oneNode = tmpDoc.createTextNode("random");
-        LinkedList<Node> oneNodeList = new LinkedList<>();
-        oneNodeList.add(oneNode);
-
         setContextMap(contextMap);
         res = visit(ctx.xq());
         ///TODO: BugFix, res.size() != 0 means NOT empty: should be TRUE [fixed]
         if (res.size() != 0) return null;  // false
-        return oneNodeList;   // true
+        return DEFAULT_COND_TRUE_LIST;   // true
     }
 
     @Override
@@ -405,13 +391,12 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         boolean bL = visit(ctx.cond(0)) != null; // not null -true /null -false
         setContextMap(currentContext);
         boolean bR = visit(ctx.cond(1)) != null; // not null -true
-        return bL && bR ? new LinkedList<>() : null;
+        return bL && bR ? DEFAULT_COND_TRUE_LIST: null;
     }
 
     @Override
     public List<Node> visitIsCond(XQueryParser.IsCondContext ctx) {
 
-        LinkedList<Node> res = new LinkedList<>();
         Map<String, List<Node>> currentCtxMap = contextMap;
 
         setContextMap(currentCtxMap);
@@ -422,8 +407,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         for (Node ln: l) {
             for (Node rn: r) {
                 if (ln.isSameNode(rn)) {
-                    res.add(ln); // only storing one node is enough
-                    return res;  // true
+                    return DEFAULT_COND_TRUE_LIST;  // true
                 }
             }
         }
@@ -432,7 +416,6 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
     @Override
     public List<Node> visitEqCond(XQueryParser.EqCondContext ctx) {
-        LinkedList<Node> res = new LinkedList<>();
         Map<String, List<Node>> currentCtxMap = contextMap;
 
         setContextMap(currentCtxMap);
@@ -443,8 +426,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         for (Node ln: l) {
             for (Node rn: r) {
                 if (ln.isEqualNode(rn)) {
-                    res.add(ln); // only storing one node is enough
-                    return res;  // true
+                    return DEFAULT_COND_TRUE_LIST;  // true
                 }
             }
         }
@@ -455,7 +437,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     @Override
     public List<Node> visitNotCond(XQueryParser.NotCondContext ctx) {
         boolean flag = visit(ctx.cond()) != null;
-        return flag ? null : new LinkedList<>();
+        return flag ? null : DEFAULT_COND_TRUE_LIST;
 
     }
 
