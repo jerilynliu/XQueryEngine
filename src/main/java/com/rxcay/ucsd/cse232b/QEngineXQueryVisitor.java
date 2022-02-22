@@ -250,7 +250,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         int varCnt = vars.size();
         List<XQueryParser.XqContext> xqs = ctx.xq();
         for (int i = 0; i < varCnt; i++) {
-            String varName = vars.get(i).getText();
+            String varName = vars.get(i).ID().getText();
             setContextMap(currentContext);
             List<Node> xqResult = visit(xqs.get(i));
             currentContext.put(varName, xqResult);
