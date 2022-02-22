@@ -102,12 +102,13 @@ public class EngineTest {
             //"XQuery_some.txt"
     );
     List<String> problemXQueryFiles = Arrays.asList(
-            "XQuery_some.txt" // very slow
+            //"XQuery_some.txt" // very slow
+            "demo_XQuery5_NPEBug.txt" // NPE while demo
     );
 
     @Test
     public void testXQueryPrintOutput(){
-        for (String fileName: xQueryFiles){
+        for (String fileName: problemXQueryFiles){
             System.out.println(fileName + " XML result:");
             try (
                     InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);

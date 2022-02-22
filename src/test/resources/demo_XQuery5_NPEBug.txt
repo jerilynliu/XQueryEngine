@@ -1,0 +1,12 @@
+<acts> {
+for $a in doc("j_caesar.xml")//ACT
+let $b:=$a/SCENE/..
+where  empty ( for $sp in $b/SPEECH
+ where ($sp/SPEAKER/text() = "MARULLUS" and $sp/../TITLE/text()="SCENE I.  Rome. A street.")
+ 		 return <speaker> {$sp/text()}</speaker>
+		)  and
+	(not $b/TITLE/text() eq"ACT I" )
+
+return <act>{$b/TITLE/text()} </act>
+}
+</acts>
