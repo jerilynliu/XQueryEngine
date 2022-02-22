@@ -182,7 +182,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     public List<Node> visitScXQ(XQueryParser.ScXQContext ctx) {
         String str = ctx.StringConstant ().getText();
         // TODO: test whether this is necessary
-        str = str.substring(1, str.length() - 1); // remove the left parenthesis and the right parenthesis
+        str = str.substring(1, str.length() - 1); // remove the left and right quote mark
 
         LinkedList<Node> res = new LinkedList<>();
         res.add(this.tmpDoc.createTextNode(str));   // performs makeText()
