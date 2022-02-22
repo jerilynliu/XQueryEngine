@@ -175,7 +175,8 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     public List<Node> visitVarXQ(XQueryParser.VarXQContext ctx) {
         setContextMap(contextMap);
         // TODO: bugfix, get terminate node ID's text as key [fixed]
-        return this.contextMap.get(ctx.var().ID().getText());
+        // TODO: bugfix, change get method to getOrDefault method so as to avoid null return value [fixed]
+        return this.contextMap.getOrDefault(ctx.var().ID().getText(), new LinkedList<Node>());
     }
 
     @Override
@@ -250,7 +251,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         int varCnt = vars.size();
         List<XQueryParser.XqContext> xqs = ctx.xq();
         for (int i = 0; i < varCnt; i++) {
-            String varName = vars.get(i).getText();
+            String varName = vars.get(i).ID().getText();
             setContextMap(currentContext);
             List<Node> xqResult = visit(xqs.get(i));
             currentContext.put(varName, xqResult);
@@ -286,7 +287,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         return bL || bR ? DEFAULT_COND_TRUE_LIST : null;
     }
 
-    // unfinished, may have npe bugs
+    
     public List<Node> visitSomeVarXq(XQueryParser.SatisfyCondContext ctx, int curIndex, Map<String, List<Node>> curMap) {
         List<Node> res;
         List<Node> finalRes;

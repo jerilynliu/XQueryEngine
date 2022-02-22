@@ -96,13 +96,13 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
     public List<Node> visitTagRP(XPathParser.TagRPContext ctx) {
 
         LinkedList<Node> res = new LinkedList<>();
-
+        String targetTagName = ctx.tagName().ID().getText();
         for (Node node : paramNodes) {
             NodeList children = node.getChildNodes();
             // iterate the children to find the nodes with the right tag
             for (int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
-                if (child.getNodeType() == Node.ELEMENT_NODE && child.getNodeName().equals(ctx.tagName().getText())) {
+                if (child.getNodeType() == Node.ELEMENT_NODE && child.getNodeName().equals(targetTagName)){
                     res.add(child);
                 }
             }
