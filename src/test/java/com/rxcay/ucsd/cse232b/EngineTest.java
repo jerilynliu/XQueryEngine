@@ -75,7 +75,7 @@ public class EngineTest {
     }
     @Test
     @Ignore
-    public void textXPathQueryPrintOutput(){
+    public void testXPathQueryPrintOutput(){
         for (String fileName: xPathFiles) {
             System.out.println(fileName + " XML result:");
             try (
@@ -87,6 +87,37 @@ public class EngineTest {
                 assert testXPathIStream != null;
                 System.out.println(testXPathResultOStream);
             } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    List<String> xQueryFiles = Arrays.asList(
+            "XQuery1.txt",
+            "XQuery2.txt",
+            "Extra_XQuery1.txt",
+            "Extra_XQuery2.txt",
+            "Extra_XQuery3.txt",
+            "Extra_XQuery4.txt"
+            //"XQuery_some.txt"
+    );
+    List<String> problemXQueryFiles = Arrays.asList(
+            "XQuery_some.txt" // very slow
+    );
+
+    @Test
+    public void testXQueryPrintOutput(){
+        for (String fileName: xQueryFiles){
+            System.out.println(fileName + " XML result:");
+            try (
+                    InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
+                    OutputStream om = new ByteArrayOutputStream()
+                    ) {
+                assert testXQueryIStream != null;
+                List<Node> rawResult = XQueryEvaluator.evaluateXQuery(testXQueryIStream);
+                XMLProcessor.generateResultXMLThenOutput(rawResult, om, false);
+                System.out.println(om);
+            } catch (Exception e){
                 throw new RuntimeException(e);
             }
         }
