@@ -10,12 +10,14 @@ xq : var                                                   #varXQ
    | startTag '{' xq '}' endTag                            #tagXQ
    | forClause letClause? whereClause? returnClause        #FLWR
    | letClause xq                                          #letXQ
+   | joinClause                                            #joinXQ
    ;
 
 forClause : 'for' var 'in' xq (',' var 'in' xq)* ;
 letClause : 'let' var ':=' xq (',' var ':=' xq)* ;
 whereClause : 'where' cond ;
 returnClause : 'return' xq ;
+joinClause: 'join' '(' xq ',' xq ',' idList ',' idList ')';
 
 cond : xq EQ xq                                                  #eqCond
      | xq IS xq                                                  #isCond
@@ -31,3 +33,5 @@ startTag: '<' tagName '>';
 endTag: '<' '/' tagName '>';
 var: '$' ID;
 StringConstant: '"'+[a-zA-Z0-9,.!?; '"-]+'"';
+
+idList: '[' ID (',' ID)* ']' | '[' ']';
