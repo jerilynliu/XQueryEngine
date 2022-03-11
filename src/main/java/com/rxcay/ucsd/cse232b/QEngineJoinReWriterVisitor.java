@@ -255,14 +255,17 @@ public class QEngineJoinReWriterVisitor extends XQueryBaseVisitor<String> {
         for (int i = 0; i < returnString.length(); i++) {
             char curCh = returnString.charAt(i);
             if (!Character.isDigit(curCh) && !Character.isLetter(curCh) && isVariable) {
-                returnString = returnString.substring(0, i) + "/*" + returnString.substring(i);
+                // OMG! this replacement is dummy. Caused wrong grammar while evaluating.
+                //TODO: bugfix: add bracket for correct grammar of commaXQ. [fixed]
+                returnString = returnString.substring(0, i) + "/*)" + returnString.substring(i);
                 isVariable = false;
             }
             if (curCh == '$') {
                 isVariable = true;
             }
         }
-        returnString = returnString.replace("$", "$tuple/");
+        // bracket linear match
+        returnString = returnString.replace("$", "($tuple/");
         finalQuery += returnString;
 
         return finalQuery;
