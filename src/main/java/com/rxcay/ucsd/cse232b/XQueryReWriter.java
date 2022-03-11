@@ -1,7 +1,16 @@
 package com.rxcay.ucsd.cse232b;
 
+import com.rxcay.ucsd.cse232b.antlr4.XQueryLexer;
+import com.rxcay.ucsd.cse232b.antlr4.XQueryParser;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilder;
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author rx_w@outlook.com
@@ -12,7 +21,7 @@ import java.util.Arrays;
 public class XQueryReWriter {
     static String rewriteToJoinXquery(String originFilePath, InputStream inputStreamToParse) {
         final String NO_CHANGE_MARK = "no change";
-        String res = NO_CHANGE_MARK;
+        String res = exeJoinWrite(inputStreamToParse);
         if( NO_CHANGE_MARK.equals(res)) {
             File oriFile = new File(originFilePath);
             return readToString(oriFile);
@@ -32,5 +41,20 @@ public class XQueryReWriter {
             throw new RuntimeException(e);
         }
         return new String(fileContent);
+    }
+
+    static String exeJoinWrite(InputStream inputStream) {
+        try {
+            CharStream cs = CharStreams.fromStream(inputStream);
+            XQueryLexer lexer = new XQueryLexer(cs);
+            CommonTokenStream tks = new CommonTokenStream(lexer);
+            XQueryParser parser = new XQueryParser(tks);
+            parser.removeErrorListeners();
+            QEngineJoinReWriterVisitor visitor = new QEngineJoinReWriterVisitor();
+            String res = visitor.visit(parser.xq());
+            return res;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

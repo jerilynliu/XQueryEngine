@@ -4,10 +4,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -123,6 +121,37 @@ public class EngineTest {
                 List<Node> rawResult = XQueryEvaluator.evaluateXQuery(testXQueryIStream);
                 XMLProcessor.generateResultXMLThenOutput(rawResult, om, true);
                 System.out.println(om);
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    List<String> originXQueryFilesToJoin = Arrays.asList(
+            "Ori_xquery1.txt"
+    );
+    @Test
+    public void textXQueryJoinReWrite(){
+        for (String fileName: originXQueryFilesToJoin){
+            System.out.println(fileName + " re write result:");
+            try (
+                    InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
+                    InputStream testXQueryIStream2 = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
+            ) {
+                assert testXQueryIStream != null;
+                String res = XQueryReWriter.exeJoinWrite(testXQueryIStream);
+                System.out.println(res);
+                System.out.println("join result: ");
+                InputStream joined = new ByteArrayInputStream(res.getBytes(StandardCharsets.UTF_8));
+                List<Node> jResult = XQueryEvaluator.evaluateXQuery(joined);
+                OutputStream jom = new ByteArrayOutputStream();
+                XMLProcessor.generateResultXMLThenOutput(jResult, jom, true);
+                System.out.println(jom);
+//                System.out.println("naive result: ");
+//                OutputStream om = new ByteArrayOutputStream();
+//                List<Node> rawResult = XQueryEvaluator.evaluateXQuery(testXQueryIStream2);
+//                XMLProcessor.generateResultXMLThenOutput(rawResult, om, true);
+//                System.out.println(om);
             } catch (Exception e){
                 throw new RuntimeException(e);
             }

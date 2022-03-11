@@ -1,0 +1,9 @@
+for $a in document("j_caesar.xml")//ACT,
+    $b in document("j_caesar.xml")//ACT,
+    $sa in $a//SCENE,
+    $sb in $b//SCENE,
+    $spa in $sa//SPEAKER,
+    $spb in $sb//SPEAKER/text(),
+    $spc in $sb//SPEAKER
+where $spb eq "FLAVIUS" and $sa eq $sb and $spa eq $spc
+return <result>{ <title>{$sa/TITLE/text()}</title> }</result>
