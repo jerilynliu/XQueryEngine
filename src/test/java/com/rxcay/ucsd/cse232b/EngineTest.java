@@ -113,7 +113,7 @@ public class EngineTest {
 
     @Test
     public void testXQueryPrintOutput(){
-        for (String fileName: problemXQueryFiles){
+        for (String fileName: XjoinQueryFiles){
             System.out.println(fileName + " XML result:");
             try (
                     InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
@@ -121,7 +121,7 @@ public class EngineTest {
                     ) {
                 assert testXQueryIStream != null;
                 List<Node> rawResult = XQueryEvaluator.evaluateXQuery(testXQueryIStream);
-                XMLProcessor.generateResultXMLThenOutput(rawResult, om, false);
+                XMLProcessor.generateResultXMLThenOutput(rawResult, om, true);
                 System.out.println(om);
             } catch (Exception e){
                 throw new RuntimeException(e);
