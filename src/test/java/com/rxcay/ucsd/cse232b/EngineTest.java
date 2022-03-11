@@ -106,6 +106,11 @@ public class EngineTest {
             "demo_XQuery5_NPEBug.txt" // NPE while demo
     );
 
+    // added new test file for M3 (XjoinQuery1 is supposed to be the rewritten result of an original query)
+    List<String> XjoinQueryFiles = Arrays.asList(
+            "XjoinQuery1.txt"
+    );
+
     @Test
     public void testXQueryPrintOutput(){
         for (String fileName: problemXQueryFiles){

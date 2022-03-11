@@ -1,0 +1,33 @@
+for $tuple in join (
+
+join (
+
+join (
+
+for $a1 in doc("j_caesar.xml")//ACT,
+$sc1 in $a1//SCENE,
+$sp1 in $sc1//SPEAKER/text()
+where $sp1 eq "FLAVIUS"
+return <tuple>{ <a1>{$a1}</a1>, <sc1>{$sc1}</sc1>, <sp1>{$sp1}</sp1> }</tuple>,
+
+for $a2 in doc("j_caesar.xml")//ACT,
+$sc2 in $a2//SCENE,
+$sp2 in $sc2//SPEAKER/text()
+return <tuple>{ <a2>{$a2}</a2>, <sc2>{$sc2}</sc2>, <sp2>{$sp2}</sp2> }</tuple>,
+
+[sp1,sc1], [sp2,sc2]),
+
+for $a3 in doc("j_caesar.xml")//ACT,
+$sc3 in $a3//SCENE,
+$sp3 in $sc3//SPEAKER/text()
+return <tuple>{ <a3>{$a3}</a3>, <sc3>{$sc3}</sc3>, <sp3>{$sp3}</sp3> }</tuple>,
+
+[sp2,sc2], [sp3,sc3]),
+
+for $a4 in doc("j_caesar.xml")//ACT,
+$sc4 in $a4//SCENE,
+$sp4 in $sc4//SPEAKER/text()
+return <tuple>{ <a4>{$a4}</a4>, <sc4>{$sc4}</sc4>, <sp4>{$sp4}</sp4> }</tuple>,
+
+[sp3,sc3], [sp4,sc4])
+return<result>{<speaker>{$tuple/sp1/*}</speaker>,<scene>{$tuple/sc1/*/TITLE/text()}</scene>,<act1>{$tuple/a1/*/TITLE/text()}</act1>,<act2>{$tuple/a2/*/TITLE/text()}</act2>,<act3>{$tuple/a3/*/TITLE/text()}</act3>,<act4>{$tuple/a4/*/TITLE/text()}</act4>}</result>
