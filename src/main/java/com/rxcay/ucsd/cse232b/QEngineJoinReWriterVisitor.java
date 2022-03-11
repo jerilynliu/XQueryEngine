@@ -12,6 +12,7 @@ import java.util.*;
  * @description
  */
 public class QEngineJoinReWriterVisitor extends XQueryBaseVisitor<String> {
+    public static final String NO_CHANGE_MARK = "original";
     @Override
     public String visitFLWR(XQueryParser.FLWRContext ctx) {
         HashMap<String, Integer> varGroup = new HashMap<>(); // store the group of each variable
@@ -45,7 +46,7 @@ public class QEngineJoinReWriterVisitor extends XQueryBaseVisitor<String> {
             groupVar.get(val).add(key); // add a variable to the group
         }
         if (groupVar.size() == 1) {
-            return "original";
+            return NO_CHANGE_MARK;
         }
 
         HashMap<Integer, LinkedList<String[]>> groupConst = new HashMap<>(); // store the constant conditions of a given group

@@ -130,9 +130,14 @@ public class EngineTest {
     List<String> originXQueryFilesToJoin = Arrays.asList(
             "Ori_xquery1.txt"
     );
+
+    List<String> anotherCheckJoinList = Arrays.asList(
+            "OCheck_XQuery1.txt",
+           "OCheck_XQuery2.txt"
+    );
     @Test
     public void textXQueryJoinReWrite(){
-        for (String fileName: originXQueryFilesToJoin){
+        for (String fileName: anotherCheckJoinList){
             System.out.println(fileName + " re write result:");
             try (
                     InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);

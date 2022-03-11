@@ -1,5 +1,5 @@
-for $a in document("j_caesar.xml")//ACT,
-    $b in document("j_caesar.xml")//ACT,
+for $a in document("j_caesar_M3.xml")//ACT,
+    $b in document("j_caesar_M3.xml")//ACT,
     $sa in $a//SCENE,
     $sb in $b//SCENE,
     $spa in $sa//SPEAKER,

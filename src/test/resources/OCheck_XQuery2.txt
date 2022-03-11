@@ -1,0 +1,8 @@
+for $a1 in doc("j_caesar_M3.xml")//PERSONAE,
+    $a2 in $a1//PERSONA/text(),
+    $a4 in $a1//GRPDESCR,
+    $b1 in doc("j_caesar_M3.xml")//PERSONAE,
+    $b2 in $b1//PERSONA/text()
+
+where $a2 eq $b2 and $a2 eq "MARULLUS"
+return <res> {$a2, $a4} </res>

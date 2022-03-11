@@ -20,9 +20,8 @@ import java.util.List;
  */
 public class XQueryReWriter {
     static String rewriteToJoinXquery(String originFilePath, InputStream inputStreamToParse) {
-        final String NO_CHANGE_MARK = "no change";
         String res = exeJoinWrite(inputStreamToParse);
-        if( NO_CHANGE_MARK.equals(res)) {
+        if( QEngineJoinReWriterVisitor.NO_CHANGE_MARK.equals(res)) {
             File oriFile = new File(originFilePath);
             return readToString(oriFile);
         }
