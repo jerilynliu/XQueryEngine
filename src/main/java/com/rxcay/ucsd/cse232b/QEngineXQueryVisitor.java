@@ -65,9 +65,6 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     }
 
 
-
-
-
     private Node makeElem(String tag, List<Node> children) {
         Node r = tmpDoc.createElement(tag);
         for (Node n : children) {
@@ -239,9 +236,9 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         Map<String,List<Node>> currentContext = this.contextMap;
         List<Map<String, List<Node>>> targetPerStates = new ArrayList<>();
         // set for FLWR
-        dfsForVarState(ctx, 0,currentContext,targetPerStates);
-        this.forClausePerStates = targetPerStates;
-        return null;
+       dfsForVarState(ctx, 0,currentContext,targetPerStates);
+       this.forClausePerStates = targetPerStates;
+       return null;
     }
 
     @Override
@@ -287,7 +284,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         return bL || bR ? DEFAULT_COND_TRUE_LIST : null;
     }
 
-
+    
     public List<Node> visitSomeVarXq(XQueryParser.SatisfyCondContext ctx, int curIndex, Map<String, List<Node>> curMap) {
         List<Node> res;
         List<Node> finalRes;
@@ -322,57 +319,6 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
     }
 
 
-
-
-//
-//    @Override
-//    public List<Node> visitSatisfyCond(XQueryParser.SatisfyCondContext ctx) {
-//        Map<String, List<Node>> currentContext = this.contextMap;
-//        int varCnt = ctx.var().size();
-//        List<String> varsInSome = new ArrayList<>(varCnt);
-//        for(XQueryParser.VarContext vCtx : ctx.var()){
-//            varsInSome.add(vCtx.ID().getText());
-//        }
-//        List<XQueryParser.XqContext> xqInSome = ctx.xq();
-//        List<List<Node>> varsNodes = new ArrayList<>();
-//        for (int i = 0; i < varCnt; i++) {
-//            setContextMap(currentContext);
-//            String varName = varsInSome.get(i);
-//            List<Node> xqResult = visit(xqInSome.get(i));
-//            currentContext.put(varName, xqResult);
-//            varsNodes.add(xqResult);
-//        }
-//        setContextMap(currentContext);
-//
-//        int per = 1;
-//        for (int i = 0; i < varCnt; i++) {
-//            per *= varsNodes.get(i).size();
-//        }
-//        if ( per <= 0) {
-//            // one var is empty, return false for sure.
-//            return null; // null -false
-//        }
-//        for (int i = 0; i < per; i++) {
-//            int[] indices = new int[varCnt];
-//            int fac = 1;
-//            for(int j = varCnt - 1;j >= 0;j --) {
-//                indices[j] = i / fac % varsNodes.get(j).size();
-//                fac*= varsNodes.get(j).size();
-//            }
-//            Map<String, List<Node>> permMap = new HashMap<>(currentContext);
-//            for(int p = 0;p < varCnt;p++) {
-//                List<Node> oneNodeList = new LinkedList<>();
-//                oneNodeList.add(varsNodes.get(p).get(indices[p]));
-//                permMap.put(varsInSome.get(p), oneNodeList);
-//            }
-//            this.setContextMap(permMap);
-//            List<Node> nullIfFalseList = visit(ctx.cond());
-//            if (nullIfFalseList != null){
-//                return nullIfFalseList;
-//            }
-//        }
-//        return null;
-//    }
 
     @Override
     public List<Node> visitEmptyCond(XQueryParser.EmptyCondContext ctx) {
@@ -444,94 +390,82 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
 
 
 
-    // TODO: M3 - Join Implementation (bugs to be fixed)
+    // TODO: M3 - Join Implementation
 
-    @Override public List<Node> visitJoinXQ(XQueryParser.JoinXQContext ctx) {
-        return visitChildren(ctx);
+    private List<Node> obtainColumns(Node tuple) {
+        List<Node> columns= new LinkedList<>();
+        int childrenSize = tuple.getChildNodes().getLength();
+        for (int i = 0; i < childrenSize; ++i)
+            columns.add(tuple.getChildNodes().item(i));
+        return columns;
     }
 
     @Override
     public List<Node> visitJoinClause(XQueryParser.JoinClauseContext ctx) {
+
         List<Node> lTable = visit(ctx.xq(0));
         List<Node> rTable = visit(ctx.xq(1));
 
-        int attrLen = ctx.idList(0).ID().size();
-        String [] lAttrList = new String[attrLen];
-        String [] rAttrList = new String[attrLen];
+        String [] lAttrList = new String[ctx.idList(0).ID().size()];
+        String [] rAttrList = new String[ctx.idList(0).ID().size()];
 
-        for (int i = 0; i < attrLen; ++i) {
+        for (int i = 0; i < ctx.idList(0).ID().size(); ++i) {
             lAttrList[i] = ctx.idList(0).ID(i).getText();
             rAttrList[i] = ctx.idList(1).ID(i).getText();
         }
 
-        HashMap<String, List<Node>> lHashTable = constructHashTable(lTable, lAttrList);
-        List<Node> result = performJoin(lAttrList, rAttrList, lHashTable, rTable);
-
-        return result;
-    }
-
-    private HashMap<String,List<Node>> constructHashTable(List<Node> table, String [] attrList) {
-        HashMap<String, List<Node>> hashTable = new HashMap<String, List<Node>>();
-        for (Node tuple: table) {
-            List<Node> cols = getColumns(tuple);
-            String key = "";
-            for (String attr: attrList)
+        // build hashtable
+        HashMap<String, List<Node>> lHashTable = new HashMap<String, List<Node>>();
+        for (Node tuple: lTable) {
+            List<Node> cols = obtainColumns(tuple);
+            StringBuilder key = new StringBuilder();
+            for (String attr: lAttrList)
                 for (Node col: cols)
-                    if (attr.equals(col.getNodeName())) key += col.getChildNodes().item(0).getTextContent();
+                    if (attr.equals(col.getNodeName()))
+                        key.append(col.getChildNodes().item(0).getTextContent());
 
-            if (hashTable.containsKey(key)) {
-                hashTable.get(key).add(tuple);
-            } else {
+            if (!lHashTable.containsKey(key.toString())) {
                 LinkedList<Node> value = new LinkedList<>();
                 value.add(tuple);
-                hashTable.put(key, value);
+                lHashTable.put(key.toString(), value);
+            } else {
+                lHashTable.get(key.toString()).add(tuple);
             }
         }
 
-        return hashTable;
-    }
 
-    private List<Node> getColumns(Node tuple) {
-        List<Node> cols = new LinkedList<>();
-        for (int i = 0; i < tuple.getChildNodes().getLength(); ++i)
-            cols.add(tuple.getChildNodes().item(i));
-
-        return cols;
-    }
-
-    private List<Node> performJoin(String [] lAttrList, String [] rAttrList,
-                                   HashMap<String, List<Node>> lHashTable, List<Node> rTable) {
-        // hashing join algorithm
+        // perform join operation
         List<Node> result = new LinkedList<>();
         for (Node tuple: rTable) {
-            List<Node> cols = getColumns(tuple);
-            String key = "";
+
+            List<Node> cols = obtainColumns(tuple);
+            StringBuilder key = new StringBuilder();
 
             for (String attr: rAttrList)
                 for (Node col: cols)
-                    if (attr.equals(col.getNodeName())) key += col.getChildNodes().item(0).getTextContent();
+                    if (attr.equals(col.getNodeName()))
+                        key.append(col.getChildNodes().item(0).getTextContent());
 
-            if (lHashTable.containsKey(key)) {
-                result.addAll(cProduct(lHashTable.get(key), tuple));
+            if (lHashTable.containsKey(key.toString())) {
+
+                List<Node> cResult = new LinkedList<>();
+
+                for (Node lNode: lHashTable.get(key.toString())) {
+                    List<Node> ccols = obtainColumns(lNode);
+                    List<Node> rcols = obtainColumns(tuple);
+                    ccols.addAll(rcols);
+
+                    result.add(makeElem("tuple", ccols));
+                }
+                result.addAll(cResult);
             }
         }
-
         return result;
     }
 
-    private List<Node> cProduct(List<Node> l, Node r) {
-        List<Node> result = new LinkedList<>();
-
-        for (Node lNode: l) {
-            List<Node> cols = getColumns(lNode);
-            List<Node> rcols = getColumns(r);
-            cols.addAll(rcols);
-
-            result.add(makeElem("tuple", cols));
-        }
-        return result;
+    @Override public List<Node> visitJoinXQ(XQueryParser.JoinXQContext ctx) {
+        return visitChildren(ctx);
     }
-
 
 
 
@@ -556,7 +490,7 @@ public class QEngineXQueryVisitor extends XQueryBaseVisitor<List<Node>>{
         return super.visitVar(ctx);
     }
 
-
+    
 
     // TODO: Read this! Attention: methods below should never be called! Do NOT change.
 
