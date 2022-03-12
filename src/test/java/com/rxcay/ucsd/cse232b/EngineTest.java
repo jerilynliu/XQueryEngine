@@ -4,10 +4,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -106,9 +104,15 @@ public class EngineTest {
             "demo_XQuery5_NPEBug.txt" // NPE while demo
     );
 
+    // added new test file for M3 (XjoinQuery1 is supposed to be the rewritten result of an original query)
+    List<String> XjoinQueryFiles = Arrays.asList(
+            "XjoinQuery1.txt"
+    );
+
+    @Ignore
     @Test
     public void testXQueryPrintOutput(){
-        for (String fileName: problemXQueryFiles){
+        for (String fileName: XjoinQueryFiles){
             System.out.println(fileName + " XML result:");
             try (
                     InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
@@ -116,8 +120,44 @@ public class EngineTest {
                     ) {
                 assert testXQueryIStream != null;
                 List<Node> rawResult = XQueryEvaluator.evaluateXQuery(testXQueryIStream);
-                XMLProcessor.generateResultXMLThenOutput(rawResult, om, false);
+                XMLProcessor.generateResultXMLThenOutput(rawResult, om, true);
                 System.out.println(om);
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    List<String> originXQueryFilesToJoin = Arrays.asList(
+            "Ori_xquery1.txt"
+    );
+
+    List<String> anotherCheckJoinList = Arrays.asList(
+            "OCheck_XQuery1.txt",
+           "OCheck_XQuery2.txt"
+    );
+    @Test
+    public void textXQueryJoinReWrite(){
+        for (String fileName: anotherCheckJoinList){
+            System.out.println(fileName + " re write result:");
+            try (
+                    InputStream testXQueryIStream = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
+                    InputStream testXQueryIStream2 = EngineTest.class.getClassLoader().getResourceAsStream(fileName);
+            ) {
+                assert testXQueryIStream != null;
+                String res = XQueryReWriter.exeJoinWrite(testXQueryIStream);
+                System.out.println(res);
+                System.out.println("join result: ");
+                InputStream joined = new ByteArrayInputStream(res.getBytes(StandardCharsets.UTF_8));
+                List<Node> jResult = XQueryEvaluator.evaluateXQuery(joined);
+                OutputStream jom = new ByteArrayOutputStream();
+                XMLProcessor.generateResultXMLThenOutput(jResult, jom, true);
+                System.out.println(jom);
+//                System.out.println("naive result: ");
+//                OutputStream om = new ByteArrayOutputStream();
+//                List<Node> rawResult = XQueryEvaluator.evaluateXQuery(testXQueryIStream2);
+//                XMLProcessor.generateResultXMLThenOutput(rawResult, om, true);
+//                System.out.println(om);
             } catch (Exception e){
                 throw new RuntimeException(e);
             }

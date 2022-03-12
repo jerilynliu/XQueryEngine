@@ -1,6 +1,7 @@
 package com.rxcay.ucsd.cse232b;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
@@ -23,13 +24,14 @@ public class XPathEvaluatorTest {
     public static InputStream getByteArrayIStreamWithUTF8(String s) {
         return new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
     }
+    @Ignore
     @Test
     public void testEvaluateXPathNaive(){
         InputStream s = getByteArrayIStreamWithUTF8(XPATH_EX1);
         List<Node> res = XPathEvaluator.evaluateXPathWithoutExceptionPrintErr(s);
         Assert.assertNotNull(res);
     }
-
+    @Ignore
     @Test
     public void testEvaluateXPathEx2(){
         List<Node> res = XPathEvaluator

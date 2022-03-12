@@ -69,7 +69,7 @@ public class QEngineXPathVisitor extends XPathBaseVisitor<List<Node>> {
     @Override
     public List<Node> visitDoc(XPathParser.DocContext ctx) {
         try {
-            return XMLProcessor.checkFileNameAndGetNodes(ctx.fileName().getText());
+            return XMLProcessor.checkFileNameAndGetNodes(ctx.fileName().FILENAME().getText());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,0 +1,99 @@
+<!DOCTYPE PLAY SYSTEM "play.dtd">
+<PLAY>
+	<TITLE>The Tragedy of Julius Caesar</TITLE>
+	<FM>
+		<P>Text placed in the public domain by Moby Lexical Tools, 1992.</P>
+		<P>SGML markup by Jon Bosak, 1992-1994.</P>
+		<P>XML version by Jon Bosak, 1996-1998.</P>
+		<P>This work may be freely copied and distributed worldwide.</P>
+	</FM>
+	<PERSONAE>
+		<TITLE>Dramatis Personae</TITLE>
+		<PERSONA>JULIUS CAESAR</PERSONA>
+		<PGROUP>
+			<PERSONA>OCTAVIUS CAESAR</PERSONA>
+			<PERSONA>MARCUS ANTONIUS</PERSONA>
+			<PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
+			<GRPDESCR>triumvirs after death of Julius Caesar.</GRPDESCR>
+		</PGROUP>
+		<PGROUP>
+			<PERSONA>CICERO</PERSONA>
+			<PERSONA>PUBLIUS</PERSONA>
+			<PERSONA>POPILIUS LENA</PERSONA>
+			<GRPDESCR>senators.</GRPDESCR>
+		</PGROUP>
+		<PGROUP>
+			<PERSONA>MARCUS BRUTUS</PERSONA>
+			<PERSONA>CASSIUS</PERSONA>
+			<PERSONA>CASCA</PERSONA>
+			<PERSONA>TREBONIUS</PERSONA>
+			<PERSONA>LIGARIUS</PERSONA>
+			<PERSONA>DECIUS BRUTUS</PERSONA>
+			<PERSONA>METELLUS CIMBER</PERSONA>
+			<PERSONA>CINNA</PERSONA>
+			<GRPDESCR>conspirators against Julius Caesar.</GRPDESCR>
+		</PGROUP>
+		<PGROUP>
+			<PERSONA>FLAVIUS</PERSONA>
+			<PERSONA>MARULLUS</PERSONA>
+			<GRPDESCR>tribunes.</GRPDESCR>
+		</PGROUP>
+		<PERSONA>ARTEMIDORUS Of Cnidos, a teacher of rhetoric. </PERSONA>
+		<PERSONA>A Soothsayer</PERSONA>
+		<PERSONA>CINNA, a poet. </PERSONA>
+		<PERSONA>Another Poet</PERSONA>
+		<PGROUP>
+			<PERSONA>LUCILIUS</PERSONA>
+			<PERSONA>TITINIUS</PERSONA>
+			<PERSONA>MESSALA</PERSONA>
+			<PERSONA>Young CATO</PERSONA>
+			<PERSONA>VOLUMNIUS</PERSONA>
+			<GRPDESCR>friends to Brutus and Cassius.</GRPDESCR>
+		</PGROUP>
+		<PGROUP>
+			<PERSONA>VARRO</PERSONA>
+			<PERSONA>CLITUS</PERSONA>
+			<PERSONA>CLAUDIUS</PERSONA>
+			<PERSONA>STRATO</PERSONA>
+			<PERSONA>LUCIUS</PERSONA>
+			<PERSONA>DARDANIUS</PERSONA>
+			<GRPDESCR>servants to Brutus.</GRPDESCR>
+		</PGROUP>
+		<PERSONA>PINDARUS, servant to Cassius.</PERSONA>
+		<PERSONA>CALPURNIA, wife to Caesar.</PERSONA>
+		<PERSONA>PORTIA, wife to Brutus.</PERSONA>
+		<PERSONA>Senators, Citizens, Guards, Attendants, &amp;c.</PERSONA>
+	</PERSONAE>
+	<SCNDESCR>SCENE Rome: the neighbourhood of Sardis: the neighbourhood of Philippi.</SCNDESCR>
+	<PLAYSUBT>JULIUS CAESAR</PLAYSUBT>
+	<ACT>
+		<TITLE>ACT I</TITLE>
+		<SCENE>
+			<TITLE>SCENE I. Rome. A street.</TITLE>
+			<STAGEDIR>Enter FLAVIUS, MARULLUS, and certain Commoners</STAGEDIR>
+			<SPEECH>
+				<SPEAKER>FLAVIUS</SPEAKER>
+				<LINE>Hence! home, you idle creatures get you home:</LINE>
+				<LINE>Is this a holiday? what! know you not,</LINE>
+				<LINE>Being mechanical, you ought not walk</LINE>
+				<LINE>Upon a labouring day without the sign</LINE>
+				<LINE>Of your profession? Speak, what trade art thou?</LINE>
+			</SPEECH>
+			<SPEECH>
+				<SPEAKER>First Commoner</SPEAKER>
+				<LINE>Why, sir, a carpenter.</LINE>
+			</SPEECH>
+			<SPEECH>
+				<SPEAKER>MARULLUS</SPEAKER>
+				<LINE>Where is thy leather apron and thy rule?</LINE>
+				<LINE>What dost thou with thy best apparel on?</LINE>
+				<LINE>You, sir, what trade are you?</LINE>
+			</SPEECH>
+			<SPEECH>
+				<SPEAKER>MARULLUS</SPEAKER>
+				<LINE>But what trade art thou? answer me directly.</LINE>
+			</SPEECH>
+			<STAGEDIR>Exeunt</STAGEDIR>
+		</SCENE>
+	</ACT>
+</PLAY>

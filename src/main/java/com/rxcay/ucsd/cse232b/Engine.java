@@ -13,11 +13,23 @@ public class Engine
 
     public static void main( String[] args )
     {
-        if(args.length != 1){
-            System.out.printf("wrong args number: expect 1 received %d \n", args.length);
-            System.out.println("usage java -jar ");
+        final String EVA_OPTION = "eva";
+        final String REW_OPTION = "rew";
+        if(args.length != 2){
+            System.out.printf("wrong args number: expect 2 received %d \n", args.length);
+            System.out.println("usage java -jar [eva | rew] [filename]");
         }
-        xQueryEvaluate(args[0]);
+        switch (args[0]) {
+            case REW_OPTION:
+                reWriteXQueryToJoin(args[1]);
+                break;
+            case EVA_OPTION:
+                xQueryEvaluate(args[1]);
+                break;
+            default:
+                System.out.println("invalid option argument use [eva | rew]");
+        }
+
     }
 
     private static void xPathEvaluate(String xPathFilePath) {
@@ -50,7 +62,7 @@ public class Engine
             return;
         }
         System.out.println("XQuery evaluation finished, writing result file...");
-        writeResultToFile(rawEvaluateRes, "xquery_result.xml", false);
+        writeResultToFile(rawEvaluateRes, "xquery_result.xml", true);
     }
 
     private static void writeResultToFile(List<Node> rawRes, String fileName, boolean addResEle) {
@@ -65,6 +77,34 @@ public class Engine
         }
         catch (Exception e){
             System.err.println("runtime exception while generating/writing result:" + e.getMessage());
+        }
+    }
+    private static void reWriteXQueryToJoin(String xQueryFilePath) {
+        String reWriteRes = "";
+        try (InputStream xQueryIStream = new FileInputStream(xQueryFilePath)){
+            reWriteRes = XQueryReWriter.rewriteToJoinXquery(xQueryFilePath, xQueryIStream);
+        }catch (IOException e) {
+            System.err.println("open xQuery file failed: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("rewrite xquery failed : " + e.getMessage());
+        }
+        File file =new File("rewrite-" + xQueryFilePath);
+
+        //if file doesnt exists, then create it
+        if(!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        //true = append file
+        try (            FileWriter fileWriter = new FileWriter(file.getName());
+                         BufferedWriter bufferWriter = new BufferedWriter(fileWriter)){
+            bufferWriter.write(reWriteRes);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 

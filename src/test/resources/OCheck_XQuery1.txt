@@ -1,0 +1,17 @@
+for
+    $act in doc("j_caesar_M3.xml")//ACT,
+    $title in $act/SCENE/TITLE,
+    $speaker1 in $act//SPEAKER/text(),
+    $speaker2 in $act//SPEAKER/text(),
+    $pg in doc("j_caesar_M3.xml")//PGROUP,
+    $persona1 in $pg/PERSONA/text(),
+    $persona2 in $pg/PERSONA/text()
+
+where $speaker1 eq $persona1 and $speaker2 eq $persona2
+
+return
+    <tuple>{
+        <scene>{$title/text()}</scene>,
+        <persona1>{$persona1}</persona1>,
+        <persona2>{$persona2}</persona2>
+    }</tuple>
