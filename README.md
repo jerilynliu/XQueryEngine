@@ -1,5 +1,5 @@
 # XQueryEngine
-Building an XQuery Engine from scratch, using ANTLR4 and JAVA. 
+An XQuery Engine built from scratch, using ANTLR4 and JAVA. 
 
 ## MileStone
 ### MileStone 1: XpathEngine
