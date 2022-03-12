@@ -109,6 +109,7 @@ public class EngineTest {
             "XjoinQuery1.txt"
     );
 
+    @Ignore
     @Test
     public void testXQueryPrintOutput(){
         for (String fileName: XjoinQueryFiles){

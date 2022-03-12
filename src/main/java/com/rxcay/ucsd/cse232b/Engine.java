@@ -62,7 +62,7 @@ public class Engine
             return;
         }
         System.out.println("XQuery evaluation finished, writing result file...");
-        writeResultToFile(rawEvaluateRes, "xquery_result.xml", false);
+        writeResultToFile(rawEvaluateRes, "xquery_result.xml", true);
     }
 
     private static void writeResultToFile(List<Node> rawRes, String fileName, boolean addResEle) {
