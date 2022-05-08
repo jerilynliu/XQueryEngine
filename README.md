@@ -43,7 +43,7 @@ usage:
     
 eg:
     
-step1 (rewite original query):
+step1 (rewrite original query):
 
     java -jar CSE-232B-M3.jar rew ori.txt
     
